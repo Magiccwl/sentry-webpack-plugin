@@ -367,8 +367,12 @@ class SentryCliPlugin {
     } else {
       this.injectRelease(compilerOptions);
     }
-
     attachAfterEmitHook(compiler, (compilation, cb) => {
+      if (this.options.outputFilesOnly) {
+        // include option replaced by files generated from the build process
+        const { path: outputPath } = compilation.outputOptions
+        this.options.include = Object.keys(compilation.assets).filter(assetName => /^js/g.test(assetName)).map(assetName => `${outputPath}/${assetName}`)
+      }
       this.finalizeRelease(compilation).then(() => cb());
     });
   }
